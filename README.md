@@ -1,120 +1,109 @@
 # Construction-Calculations-Suite
-A set of Construction Calculations - Very important for material conventions
 
-A complete, production-grade engineering calculations suite in Python. It goes far beyond a simple mass = volume × density — the design is modular, extensible, fully unit-aware, and includes professional features like:
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI Version](https://img.shields.io/pypi/v/construction-calculations-suite.svg?color=brightgreen)](https://pypi.org/project/construction-calculations-suite/)
+[![Build Status](https://img.shields.io/travis/datoxic0/Construction-Calculations-Suite.svg?style=flat-square)](https://travis-ci.org/datoxic0/Construction-Calculations-Suite)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Material density library (over 30 materials, with loose/compacted variants)
+A comprehensive Python suite for construction material volume and weight calculations, designed for professional engineering and logistics applications. This tool facilitates accurate conversions between volume and mass for bulk materials, incorporating essential factors like unit conversions, cost estimation, and site-specific corrections.
 
-Multi-unit support for volume (m³, L, ft³, yd³, US gal, etc.) and mass (metric ton, short ton, long ton, kg, lb)
+## Features
 
-Bi‑directional conversion (volume ↔ mass) with automatic unit normalization
+*   **Extensive Unit Support:**
+    *   **Volume:** Cubic Metre (m³), Litre (L), Cubic Foot (ft³), Cubic Yard (yd³), US Gallon (gal(US)), Imperial Gallon (gal(UK)), Cubic Inch (in³).
+    *   **Mass:** Metric Tonne (t), Kilogram (kg), Short Ton (st), Long Ton (lt), Pound (lb).
+*   **Material Density Library:** A built-in library with over 30 common construction materials (e.g., sand, gravel, concrete, asphalt, wood chips) including loose and compacted densities.
+*   **Bi-directional Conversion:** Seamlessly convert between volume and mass using `volume_to_mass()` and `mass_to_volume()` functions.
+*   **Correction Factors:** Account for real-world variations with adjustable factors for:
+    *   Moisture Content (`moisture_factor`)
+    *   Compaction (`compaction_factor`)
+    *   Swell (`swell_factor`)
+    *   Waste (`waste_factor`)
+*   **Cost Estimation:** Calculate project costs based on price per unit mass or volume, supporting various currency symbols and units.
+*   **User-Friendly API:** A high-level `ConversionSuite` class provides a simple interface for common operations.
+*   **Command-Line Interface (CLI):** An interactive CLI for quick, ad-hoc calculations directly from the terminal.
+*   **Extensibility:** Designed for easy addition of new units, materials, or custom correction logic.
+*   **Robustness:** Includes input validation, error handling, and a suite of unit tests for reliability.
 
-Cost estimation (price per ton, per m³, total project cost)
+## Setup Instructions
 
-Correction factors (moisture content, compaction, swell, waste)
+### Installation
 
-Input validation & robust error handling
+This library can be installed directly from PyPI:
 
-Command‑line interface for quick use
+```bash
+pip install construction-calculations-suite
+```
 
-Extensive docstrings, type hints, and unit tests — built to be maintained and extended.
+Alternatively, you can clone the repository and use the provided Python file directly:
 
-You can drop the following code into a file (e.g. calculations_suite.py) and run it directly, import it as a module, or use its CLI. I’ll explain the architecture after the code.
+```bash
+git clone https://github.com/datoxic0/Construction-Calculations-Suite.git
+cd Construction-Calculations-Suite
+# Now you can run the script directly or import it
+```
 
-Architecture & Professional Design Choices
-1. Unit Safety & Extensibility
-Enums VolumeUnit and MassUnit store exact conversion factors to SI base units (m³ and kg). No magic numbers.
+### Usage
 
-Each unit knows its own symbol; you can look up by symbol (e.g., "m³" → VolumeUnit.CUBIC_METRE). This makes the CLI and API string‑friendly while keeping type safety.
+#### As a Module
 
-Adding a new unit (e.g., barrel, acre‑foot) is a one‑line addition.
+Import the `ConversionSuite` class into your Python project:
 
-2. Material Density Library
-Material class holds the dry density in kg/m³. MATERIAL_LIBRARY provides over 30 materials (from topsoil to steel) with typical ranges.
-
-get_material() supports partial matching, so users can type “sand” and get a list of matches or auto‑select if unique.
-
-Easy to extend with custom materials at runtime.
-
-3. Correction Factors
-In the real world, density varies with moisture, compaction, swell, and project waste. CorrectionFactors applies multiplicative factors to the base density.
-
-Example: wet sand might have moisture_factor=1.08, compacted soil compaction_factor=1.15, and you can chain them.
-
-4. Conversion Engine
-MaterialConverter handles the mathematics: volume_to_mass() and mass_to_volume().
-
-Internally, it normalises everything to SI (m³ → kg), then converts to the desired output units. This prevents floating‑point error accumulation.
-
-Input validation ensures non‑negative quantities.
-
-5. Cost Estimation
-CostCalculator works with volume‑based or mass‑based pricing, independent of the selected material’s default units.
-
-You can price in 
-/
-m
-3
-,
-/m 
-3
- ,/t, $/kg, etc. – all conversions are automatic.
-
-6. Public API (ConversionSuite)
-A clean, user‑friendly facade for 90% of use cases.
-
-You set the material once, then convert multiple values without re‑specifying units or corrections.
-
-String‑based unit selection (e.g., "gal", "st", "yd³") makes it ideal for interactive or scripted use.
-
-7. Command‑Line Interface
-Fully interactive for quick ad‑hoc jobs. Lists materials, guides you through unit selection, and supports correction entry.
-
-Non‑interactive demo (--demo) and unit‑test (--test) modes allow verification and integration.
-
-8. Testing & Robustness
-run_tests() validates core conversions against known physical constants (water, concrete). Easy to extend with pytest.
-
-All public methods validate inputs and raise descriptive exceptions.
-
-Usage Examples (Beyond the Demo)
-python
-# Quick script
+```python
 from calculations_suite import ConversionSuite
 
+# Initialize the suite
 suite = ConversionSuite()
-suite.select_material("topsoil_compacted", moisture_factor=1.02, waste_factor=1.10)
 
-# How many metric tonnes is 45 m³?
-tons = suite.volume_to_mass(45, "m³", "t")
-print(f"45 m³ compacted topsoil = {tons:.2f} t")
+# Select a material and optionally apply corrections
+suite.select_material("sand_dry_loose", moisture_factor=1.05, waste_factor=1.10)
 
-# How many cubic yards do I need for 30 short tons?
-vol = suite.mass_to_volume(30, "st", "yd³")
-print(f"30 st = {vol:.2f} yd³")
+# Convert volume to mass
+volume_m3 = 10.0
+mass_tonnes = suite.volume_to_mass(volume_m3, vol_unit="m³", mass_unit="t")
+print(f"{volume_m3} m³ of sand is approximately {mass_tonnes:.2f} tonnes.")
 
-# Cost: $18.50 per metric tonne
-cost = suite.estimate_cost_by_mass(tons, "t", 18.50, "t")
-print(cost)
-Result:
+# Convert mass to volume
+mass_short_tons = 25.0
+volume_cubic_yards = suite.mass_to_volume(mass_short_tons, mass_unit="st", vol_unit="yd³")
+print(f"{mass_short_tons} short tons of sand is approximately {volume_cubic_yards:.2f} cubic yards.")
 
-text
-45 m³ compacted topsoil = 78.57 t
-30 st = 19.24 yd³
-$1,453.55
-How to Run
-Save the code as calculations_suite.py.
+# Estimate cost
+price_per_tonne = 15.50
+cost = suite.estimate_cost_by_mass(mass_tonnes, "t", price_per_tonne, "t", currency="$")
+print(f"The estimated cost for {mass_tonnes:.2f} tonnes is {cost}.")
+```
 
-Run the interactive calculator:
+#### Command-Line Interface (CLI)
+
+Run the script directly from your terminal to use the interactive CLI:
+
+```bash
 python calculations_suite.py
+```
 
-Run built‑in tests:
-python calculations_suite.py --test
+The CLI will guide you through selecting materials, applying corrections, and performing conversions or cost estimations.
 
-Run a quick demo:
+You can also run built-in demonstrations or tests:
+
+```bash
+# Run a quick demonstration of features
 python calculations_suite.py --demo
 
-Import into your own project and use ConversionSuite directly.
+# Run the unit tests
+python calculations_suite.py --test
+```
 
-This suite is production‑ready, highly accurate (all factors are IEEE 754‑compatible and based on internationally recognised standards like NIST and BIPM definitions), and designed for real‑world logistics, construction, and engineering calculations.
+## Technology Stack
 
+*   **Python:** 3.8+
+*   **Standard Library:** `enum`, `typing`, `math`, `sys`
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request or open an Issue.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
