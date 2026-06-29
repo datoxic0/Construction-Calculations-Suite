@@ -9,7 +9,7 @@ Supports: metric tonnes, short tons, long tons, kg, lb
           cubic metre, litre, cubic foot, cubic yard, US gallon
           cost estimation, moisture/compaction corrections
 
-Author: AI Engineering Solutions
+Author: Siyabonga Blessing Phakathi
 Version: 2.0.0
 """
 
