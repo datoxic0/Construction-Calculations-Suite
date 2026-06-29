@@ -429,4 +429,38 @@ def run_demo():
     suite.select_material("concrete")
     cost = suite.estimate_cost_by_mass(50, "t", 120.0, "t", "$")
     print(f"Example 4: 50 t of concrete at $120/t => {cost}")
-    # E
+    # Example 5: Convert 1 m³ of water to long tons (imperial)
+    suite.select_material("water")
+    water_lt = suite.volume_to_mass(1, "m³", "lt")
+    print(f"Example 5: 1 m³ water = {water_lt:.4f} long tons")
+    # Example 6: 500 US gallons of diesel to short tons
+    suite.select_material("diesel")
+    diesel_st = suite.volume_to_mass(500, "gal(US)", "st")
+    print(f"Example 6: 500 US gal diesel = {diesel_st:.2f} short tons")
+
+def run_tests():
+    """Minimal test suite using assertions."""
+    suite = ConversionSuite()
+    suite.select_material("water")
+    assert abs(suite.volume_to_mass(1, "m³", "t") - 1.0) < 1e-6
+    assert abs(suite.mass_to_volume(1000, "kg", "m³") - 1.0) < 1e-6
+    suite.select_material("concrete")
+    # 1 m³ concrete approx 2.4 t
+    mass = suite.volume_to_mass(1, "m³", "t")
+    assert 2.3 < mass < 2.5
+    vol = suite.mass_to_volume(2400, "kg", "m³")
+    assert abs(vol - 1.0) < 0.05
+    # Test with corrections
+    suite.select_material("sand_dry_loose", moisture_factor=1.1)
+    dry_mass = 10 * 1442 / 1000  # approximate
+    wet_mass = suite.volume_to_mass(10, "m³", "t")
+    assert wet_mass > dry_mass
+    print("All basic tests passed.")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--test":
+        run_tests()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--demo":
+        run_demo()
+    else:
+        interactive_cli()
